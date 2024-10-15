@@ -1,0 +1,20 @@
+server:
+  port: 8085
+spring:
+  application:
+    api-prefix: /api/v1
+    name: vnpay-service
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+payment:
+  vnPay:
+    url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+    tmnCode: Z1BYU05E
+    secretKey: QY622CNK9NFWFW0N8UJ05K7T2600VX9H
+    returnUrl: http://localhost:8085/api/v1/payment/vn-pay-callback
+    version: 2.1.0
+    command: pay
+    orderType: other
+
