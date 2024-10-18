@@ -5,7 +5,7 @@ spring:
     name: cart-service
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3302/cartdb
+    url: jdbc:mysql://localhost:3303/cartdb
     username: root
     password: root
   jpa:
