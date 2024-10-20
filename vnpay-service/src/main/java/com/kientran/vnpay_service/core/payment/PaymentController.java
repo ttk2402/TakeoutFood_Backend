@@ -14,11 +14,13 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class PaymentController {
     private final PaymentService paymentService;
+
     @GetMapping("/vn-pay")
     @ResponseBody
     public ResponseObject<PaymentDTO.VNPayResponse> pay(HttpServletRequest request) {
         return new ResponseObject<>(HttpStatus.OK, "Success", paymentService.createVnPayPayment(request));
     }
+
     @GetMapping("/vn-pay-callback")
     public String payCallbackHandler(HttpServletRequest request, Model model) {
         String status = request.getParameter("vnp_ResponseCode");
@@ -33,22 +35,26 @@ public class PaymentController {
         } catch (NumberFormatException e) {
             amountValue = 0;
         }
+        // Xây dựng URL chuyển hướng
+        String redirectUrl = "http://localhost:5173"; // Địa chỉ ứng dụng React của bạn
         if ("00".equals(status)) {
-            model.addAttribute("message", "Thanh toán thành công!");
-            model.addAttribute("transactionId", transactionId);
-            model.addAttribute("amount", String.format("%.2f VND", amountValue));
-            model.addAttribute("orderInfo", orderInfo);
-            model.addAttribute("bankCode", bankCode);
-            model.addAttribute("payDate", payDate);
-            return "success"; // Renders success.html
+            // Nếu thanh toán thành công
+            redirectUrl += "/thanh-toan-thanh-cong"
+                    + "?transactionId=" + transactionId
+                    + "&amount=" + String.format("%.2f VND", amountValue)
+                    + "&orderInfo=" + orderInfo
+                    + "&bankCode=" + bankCode
+                    + "&payDate=" + payDate;
         } else {
-            model.addAttribute("message", "Thanh toán thất bại. Vui lòng thử lại.");
-            model.addAttribute("transactionId", transactionId);
-            model.addAttribute("amount", String.format("%.2f VND", amountValue));
-            model.addAttribute("orderInfo", orderInfo);
-            model.addAttribute("bankCode", bankCode);
-            model.addAttribute("payDate", payDate);
-            return "failure"; // Renders failure.html
+            // Nếu thanh toán thất bại
+            redirectUrl += "/thanh-toan-that-bai"
+                    + "?transactionId=" + transactionId
+                    + "&amount=" + String.format("%.2f VND", amountValue)
+                    + "&orderInfo=" + orderInfo
+                    + "&bankCode=" + bankCode
+                    + "&payDate=" + payDate;
         }
+        // Chuyển hướng đến ứng dụng React
+        return "redirect:" + redirectUrl;
     }
 }
