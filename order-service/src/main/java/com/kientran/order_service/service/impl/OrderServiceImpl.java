@@ -10,6 +10,7 @@ import com.kientran.order_service.service.BillService;
 import com.kientran.order_service.service.ItemOrderedService;
 import com.kientran.order_service.service.OrderService;
 import org.modelmapper.ModelMapper;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
@@ -30,6 +31,27 @@ public class OrderServiceImpl implements OrderService {
     private final CartServiceClient cartServiceClient;
     private final KafkaTemplate<String, String> kafkaTemplate;
     private static final String DELETE_ITEM_TOPIC = "delete_item_topic";
+
+    @KafkaListener(topics = "update_status_order_topic")
+    public void consume_to_update_status(String message) {
+        System.out.println("Message received from shipping-service to update status order: " + message);
+        Integer orderId = Integer.parseInt(message);
+        changeStatusOfOrder(orderId, 3);
+    }
+
+    @KafkaListener(topics = "update_cancel_order_topic")
+    public void consume_to_cancel_order(String message) {
+        System.out.println("Message received from shipping-service to update re-status order: " + message);
+        Integer orderId = Integer.parseInt(message);
+        changeStatusOfOrder(orderId, 2);
+    }
+
+    @KafkaListener(topics = "update_complete_order_topic")
+    public void consume_to_complete_order(String message) {
+        System.out.println("Message received from shipping-service to update complete order: " + message);
+        Integer orderId = Integer.parseInt(message);
+        changeStatusOfOrder(orderId, 4);
+    }
 
     public OrderServiceImpl(DeliveryInformationRepository deliveryInfoRepository, CheckoutRepository checkOutRepository, OrderStatusRepository orderStatusRepository, OrderRepository orderRepository, BillRepository billRepository, ModelMapper modelMapper, ItemOrderedService itemOrderedService, BillService billService, CartServiceClient cartServiceClient, KafkaTemplate<String, String> kafkaTemplate) {
         this.deliveryInfoRepository = deliveryInfoRepository;
@@ -139,24 +161,21 @@ public class OrderServiceImpl implements OrderService {
     public List<ResOrderDto> getOrdersByOrderStatus(Integer orderStatusId) {
         OrderStatus order_status = this.orderStatusRepository.findById(orderStatusId).orElseThrow(()-> new ResourceNotFoundException("OrderStatus","OrderStatusId", orderStatusId));
         List<Order> orders = this.orderRepository.findByOrderStatus(order_status);
-        List<ResOrderDto> orderDtos = orders.stream().map((order) -> this.modelMapper.map(order, ResOrderDto.class))
+        return orders.stream().map((order) -> this.modelMapper.map(order, ResOrderDto.class))
                 .collect(Collectors.toList());
-        return orderDtos;
     }
     @Override
     public List<ResOrderDto> getAllOrder() {
         List<Order> orders = this.orderRepository.findAll();
-        List<ResOrderDto> orderDtos = orders.stream().map((order) -> this.modelMapper.map(order, ResOrderDto.class))
+        return orders.stream().map((order) -> this.modelMapper.map(order, ResOrderDto.class))
                 .collect(Collectors.toList());
-        return orderDtos;
     }
 
     @Override
     public List<ResOrderDto> getAllOrderOfAccountID(Integer accountId) {
         List<Order> orders = this.orderRepository.findByAccountId(accountId);
-        List<ResOrderDto> orderDtos = orders.stream().map((order) -> this.modelMapper.map(order, ResOrderDto.class))
+        return orders.stream().map((order) -> this.modelMapper.map(order, ResOrderDto.class))
                 .collect(Collectors.toList());
-        return orderDtos;
     }
 
     @Override

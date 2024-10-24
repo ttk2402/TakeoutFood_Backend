@@ -17,6 +17,7 @@ public class AccountController {
     private final KafkaTemplate<String, String> kafkaTemplate;
     private static final String ADD_ACCOUNT_TOPIC = "add_account_topic";
     private static final String DELETE_ACCOUNT_TOPIC = "delete_account_topic";
+    private static final String ADD_SHIPPER_TOPIC = "add_shipper_topic";
 
     public AccountController(AccountService accountService, KafkaTemplate<String, String> kafkaTemplate) {
         this.accountService = accountService;
@@ -28,8 +29,13 @@ public class AccountController {
                                                             @PathVariable Integer roleId) {
         ResAccountDto newAccountDto = this.accountService.createAccount(accountDto, roleId);
         if(newAccountDto != null && (!newAccountDto.getRole().getRole().equals("ADMIN"))) {
-            String account_ID = String.valueOf(newAccountDto.getId());
-            kafkaTemplate.send(ADD_ACCOUNT_TOPIC, account_ID);
+            if(newAccountDto.getRole().getRole().equals("STAFF") || newAccountDto.getRole().getRole().equals("CUSTOMER")) {
+                String account_ID = String.valueOf(newAccountDto.getId());
+                kafkaTemplate.send(ADD_ACCOUNT_TOPIC, account_ID);
+            }else{
+                String account_ID = String.valueOf(newAccountDto.getId());
+                kafkaTemplate.send(ADD_SHIPPER_TOPIC, account_ID);
+            }
         }
         return new ResponseEntity<>(newAccountDto, HttpStatus.CREATED);
     }

@@ -42,8 +42,7 @@ public class BillServiceImpl implements BillService {
     @Override
     public List<BillDto> getAllBill() {
         List<Bill> bills = this.billRepository.findAll();
-        List<BillDto> billDtos = bills.stream().map((bill) -> this.modelMapper.map(bill, BillDto.class))
+        return bills.stream().map((bill) -> this.modelMapper.map(bill, BillDto.class))
                 .collect(Collectors.toList());
-        return billDtos;
     }
 }
