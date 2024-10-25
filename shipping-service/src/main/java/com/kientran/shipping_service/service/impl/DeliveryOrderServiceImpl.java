@@ -29,7 +29,8 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
     private final DeliveryOrderRepository deliveryOrderRepository;
     private final ShipperRepository shipperRepository;
     private final ModelMapper modelMapper;
-    private static final Path CURRENT_FOLDER = Paths.get(System.getProperty("user.dir"));
+    //  private static final Path CURRENT_FOLDER = Paths.get(System.getProperty("user.dir"));
+    private static final Path CURRENT_FOLDER = Paths.get(System.getProperty("user.dir")).resolve("shipping-service");
 
     public DeliveryOrderServiceImpl(DeliveryOrderRepository deliveryOrderRepository, ShipperRepository shipperRepository, ModelMapper modelMapper) {
         this.deliveryOrderRepository = deliveryOrderRepository;
@@ -53,13 +54,13 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 
     @Override
     public ResDeliveryOrderDto getDeliveryOrder(Integer deliveryOrderId) {
-        DeliveryOrder deliveryOrder = this.deliveryOrderRepository.findById(deliveryOrderId).orElseThrow(()-> new ResourceNotFoundException("DeliveryOrder","DeliveryId", deliveryOrderId));
+        DeliveryOrder deliveryOrder = this.deliveryOrderRepository.findById(deliveryOrderId).orElseThrow(() -> new ResourceNotFoundException("DeliveryOrder", "DeliveryId", deliveryOrderId));
         return this.modelMapper.map(deliveryOrder, ResDeliveryOrderDto.class);
     }
 
     @Override
     public Integer deleteDeliveryOrder(Integer deliveryOrderId) {
-        DeliveryOrder deliveryOrder = this.deliveryOrderRepository.findById(deliveryOrderId).orElseThrow(()-> new ResourceNotFoundException("DeliveryOrder","DeliveryId", deliveryOrderId));
+        DeliveryOrder deliveryOrder = this.deliveryOrderRepository.findById(deliveryOrderId).orElseThrow(() -> new ResourceNotFoundException("DeliveryOrder", "DeliveryId", deliveryOrderId));
         Integer orderId = deliveryOrder.getOrderId();
         this.deliveryOrderRepository.delete(deliveryOrder);
         return orderId;
@@ -85,9 +86,9 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 
     @Override
     public ResDeliveryOrderDto addImageConfirmation(Integer deliveryOrderId, MultipartFile image) throws IOException {
-        DeliveryOrder deliveryOrder = this.deliveryOrderRepository.findById(deliveryOrderId).orElseThrow(()-> new ResourceNotFoundException("DeliveryOrder","DeliveryId", deliveryOrderId));
-
-        Path staticPath = Paths.get("static");
+        DeliveryOrder deliveryOrder = this.deliveryOrderRepository.findById(deliveryOrderId).orElseThrow(() -> new ResourceNotFoundException("DeliveryOrder", "DeliveryId", deliveryOrderId));
+//        Path staticPath = Paths.get("static");
+        Path staticPath = Paths.get("src/main/resources/static");
         Path imagePath = Paths.get("images");
         if (!Files.exists(CURRENT_FOLDER.resolve(staticPath).resolve(imagePath))) {
             Files.createDirectories(CURRENT_FOLDER.resolve(staticPath).resolve(imagePath));
@@ -112,7 +113,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 
     @Override
     public ResDeliveryOrderDto cancelImageConfirmation(Integer deliveryOrderId) {
-        DeliveryOrder deliveryOrder = this.deliveryOrderRepository.findById(deliveryOrderId).orElseThrow(()-> new ResourceNotFoundException("DeliveryOrder","DeliveryId", deliveryOrderId));
+        DeliveryOrder deliveryOrder = this.deliveryOrderRepository.findById(deliveryOrderId).orElseThrow(() -> new ResourceNotFoundException("DeliveryOrder", "DeliveryId", deliveryOrderId));
         deliveryOrder.setImageConfirmation(null);
         deliveryOrder.setCompleteDate(null);
         deliveryOrder.setIsCompleted(false);

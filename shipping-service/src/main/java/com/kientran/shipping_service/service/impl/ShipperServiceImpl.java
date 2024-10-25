@@ -77,19 +77,19 @@ public class ShipperServiceImpl implements ShipperService {
     }
 
     @Override
-    public ResShipperDto updateIncome(Integer shipperId) {
+    public void updateIncome(Integer shipperId) {
         Shipper shipper = this.shipperRepository.findById(shipperId).orElseThrow(() -> new ResourceNotFoundException("Shipper", "ShipperId", shipperId));
         shipper.setAmount(shipper.getAmount()+15000.0);
         Shipper updatedShipper = this.shipperRepository.save(shipper);
-        return this.modelMapper.map(updatedShipper, ResShipperDto.class);
+        this.modelMapper.map(updatedShipper, ResShipperDto.class);
     }
 
     @Override
-    public ResShipperDto downIncome(Integer shipperId) {
+    public void downIncome(Integer shipperId) {
         Shipper shipper = this.shipperRepository.findById(shipperId).orElseThrow(() -> new ResourceNotFoundException("Shipper", "ShipperId", shipperId));
         shipper.setAmount(shipper.getAmount()-15000.0);
         Shipper updatedShipper = this.shipperRepository.save(shipper);
-        return this.modelMapper.map(updatedShipper, ResShipperDto.class);
+        this.modelMapper.map(updatedShipper, ResShipperDto.class);
     }
 
     @Override

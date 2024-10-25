@@ -73,5 +73,4 @@ public class ShipperController {
         List<ResShipperDto> shipperDtos = this.shipperService.getAllShipper();
         return new ResponseEntity<>(shipperDtos, HttpStatus.OK);
     }
-
 }

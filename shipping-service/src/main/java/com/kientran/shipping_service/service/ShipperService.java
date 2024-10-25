@@ -10,8 +10,8 @@ public interface ShipperService {
     ResShipperDto getShipperByAccountID(Integer accountId);
     ResShipperDto addPaymentInfo(Integer shipperId, Integer paymentId);
     ResShipperDto  updateShipper(UpdateShipperDto updateShipperDto, Integer shipperId);
-    ResShipperDto  updateIncome(Integer shipperId);
-    ResShipperDto  downIncome(Integer shipperId);
+    void updateIncome(Integer shipperId);
+    void downIncome(Integer shipperId);
     void deleteShipper(Integer shipperId);
     List<ResShipperDto> getAllShipper();
 }
