@@ -14,6 +14,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,6 +37,14 @@ public class ShipperServiceImpl implements ShipperService {
         Integer accountId = Integer.parseInt(message);
         shipperDto.setAccountId(accountId);
         createShipper(shipperDto);
+    }
+
+    @KafkaListener(topics = "delete_shipper_topic")
+    public void consume_to_delete_shipper(String message) {
+        System.out.println("Message received from identity-service to remove shipper: " + message);
+        Integer accountId = Integer.parseInt(message);
+        ResShipperDto resShipperDto = getShipperByAccountID(accountId);
+        deleteShipper(resShipperDto.getId());
     }
 
     @Override
@@ -77,19 +86,24 @@ public class ShipperServiceImpl implements ShipperService {
     }
 
     @Override
+    public void resetIncome(Integer shipperId) {
+        Shipper shipper = this.shipperRepository.findById(shipperId).orElseThrow(() -> new ResourceNotFoundException("Shipper", "ShipperId", shipperId));
+        shipper.setAmount(0.0);
+        this.shipperRepository.save(shipper);
+    }
+
+    @Override
     public void updateIncome(Integer shipperId) {
         Shipper shipper = this.shipperRepository.findById(shipperId).orElseThrow(() -> new ResourceNotFoundException("Shipper", "ShipperId", shipperId));
-        shipper.setAmount(shipper.getAmount()+15000.0);
-        Shipper updatedShipper = this.shipperRepository.save(shipper);
-        this.modelMapper.map(updatedShipper, ResShipperDto.class);
+        shipper.setAmount(shipper.getAmount() + 15000.0);
+        this.shipperRepository.save(shipper);
     }
 
     @Override
     public void downIncome(Integer shipperId) {
         Shipper shipper = this.shipperRepository.findById(shipperId).orElseThrow(() -> new ResourceNotFoundException("Shipper", "ShipperId", shipperId));
-        shipper.setAmount(shipper.getAmount()-15000.0);
-        Shipper updatedShipper = this.shipperRepository.save(shipper);
-        this.modelMapper.map(updatedShipper, ResShipperDto.class);
+        shipper.setAmount(shipper.getAmount() - 15000.0);
+        this.shipperRepository.save(shipper);
     }
 
     @Override

@@ -12,6 +12,7 @@ public interface DeliveryOrderService {
     ResDeliveryOrderDto createDeliveryOrder(DeliveryOrderDto deliveryOrderDto, Integer shipperId);
     ResDeliveryOrderDto getDeliveryOrder(Integer deliveryOrderId);
     Integer deleteDeliveryOrder(Integer deliveryOrderId);
+    List<ResDeliveryOrderDto> getAllDeliveryOrder();
     List<ResDeliveryOrderDto> getAllDeliveryOrderCurrentDto();
     List<ResDeliveryOrderDto> getAllDeliveryOrderCompleteDto();
     ResDeliveryOrderDto addImageConfirmation(Integer deliveryOrderId, MultipartFile image) throws IOException;

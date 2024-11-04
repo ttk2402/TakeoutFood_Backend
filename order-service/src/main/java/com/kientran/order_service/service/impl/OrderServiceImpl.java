@@ -123,7 +123,7 @@ public class OrderServiceImpl implements OrderService {
         }
         Integer orderId = addOrder.getId();
         Order orderUpdate = this.orderRepository.findById(orderId).orElseThrow(()-> new ResourceNotFoundException("Order","OrderId", orderId));
-        orderUpdate.setTotalprice(total_price);
+        orderUpdate.setTotalprice(total_price+15000.0);
         BillDto billDto = new BillDto();
         billDto.setIssuedate(orderUpdate.getDate());
         billDto.setTotalprice(orderUpdate.getTotalprice());

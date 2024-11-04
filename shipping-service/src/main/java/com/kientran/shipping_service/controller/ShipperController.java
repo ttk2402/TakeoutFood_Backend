@@ -68,6 +68,13 @@ public class ShipperController {
                 HttpStatus.OK);
     }
 
+    @PutMapping("/resetIncome/{shipperId}")
+    public ResponseEntity<ApiResponse> resetIncomeShipper(@PathVariable Integer shipperId) {
+        this.shipperService.resetIncome(shipperId);
+        return new ResponseEntity<>(new ApiResponse("Amount is updated successfully!", true),
+                HttpStatus.OK);
+    }
+
     @GetMapping("/")
     public ResponseEntity<List<ResShipperDto>> getAllShipper() {
         List<ResShipperDto> shipperDtos = this.shipperService.getAllShipper();

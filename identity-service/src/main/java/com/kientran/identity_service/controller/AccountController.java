@@ -18,6 +18,7 @@ public class AccountController {
     private static final String ADD_ACCOUNT_TOPIC = "add_account_topic";
     private static final String DELETE_ACCOUNT_TOPIC = "delete_account_topic";
     private static final String ADD_SHIPPER_TOPIC = "add_shipper_topic";
+    private static final String DELETE_SHIPPER_TOPIC = "delete_shipper_topic";
 
     public AccountController(AccountService accountService, KafkaTemplate<String, String> kafkaTemplate) {
         this.accountService = accountService;
@@ -44,8 +45,13 @@ public class AccountController {
     public ResponseEntity<ApiResponse> deleteAccount(@PathVariable Integer accountId) {
         ResAccountDto newAccountDto = this.accountService.getAccount(accountId);
         if(newAccountDto != null && (!newAccountDto.getRole().getRole().equals("ADMIN"))) {
-            String account_ID = String.valueOf(accountId);
-            kafkaTemplate.send(DELETE_ACCOUNT_TOPIC, account_ID);
+            if(newAccountDto.getRole().getRole().equals("SHIPPER")){
+                String account_ID = String.valueOf(accountId);
+                kafkaTemplate.send(DELETE_SHIPPER_TOPIC, account_ID);
+            }else{
+                String account_ID = String.valueOf(accountId);
+                kafkaTemplate.send(DELETE_ACCOUNT_TOPIC, account_ID);
+            }
         }
         this.accountService.deleteAccount(accountId);
         return new ResponseEntity<>(new ApiResponse("Account is deleted successfully!", true),

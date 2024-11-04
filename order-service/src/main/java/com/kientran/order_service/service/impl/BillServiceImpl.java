@@ -1,6 +1,9 @@
 package com.kientran.order_service.service.impl;
 
 import com.kientran.order_service.dto.BillDto;
+import com.kientran.order_service.dto.RevenueDayDto;
+import com.kientran.order_service.dto.RevenueMonthDto;
+import com.kientran.order_service.dto.RevenueYearDto;
 import com.kientran.order_service.entity.Bill;
 import com.kientran.order_service.exception.ResourceNotFoundException;
 import com.kientran.order_service.repository.BillRepository;
@@ -43,6 +46,61 @@ public class BillServiceImpl implements BillService {
     public List<BillDto> getAllBill() {
         List<Bill> bills = this.billRepository.findAll();
         return bills.stream().map((bill) -> this.modelMapper.map(bill, BillDto.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<RevenueDayDto> calculateRevenue(String startDate, String endDate) {
+        List<Object[]> results = billRepository.calculateRevenueDayToDay(startDate, endDate);
+        return results.stream()
+                .map(row -> new RevenueDayDto(
+                        row[0].toString(), // Ánh xạ issue_date sang String
+                        ((Number) row[1]).doubleValue() // Ánh xạ total_for_day sang Double
+                ))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<RevenueDayDto> calculateRevenueLatest() {
+        List<Object[]> results = billRepository.calculateRevenueLatest();
+        return results.stream()
+                .map(row -> new RevenueDayDto(
+                        row[0].toString(), // Ánh xạ issue_date sang String
+                        ((Number) row[1]).doubleValue() // Ánh xạ total_for_day sang Double
+                ))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<RevenueMonthDto> calculateRevenueMonthLatest() {
+        List<Object[]> results = billRepository.calculateRevenueMonthLatest();
+        return results.stream()
+                .map(row -> new RevenueMonthDto(
+                        row[0].toString(), // Ánh xạ issue_date sang String
+                        ((Number) row[1]).doubleValue() // Ánh xạ total_for_day sang Double
+                ))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<RevenueMonthDto> calculateRevenueMonthToMonth(String startDate, String endDate) {
+        List<Object[]> results = billRepository.calculateRevenueMonthToMonth(startDate, endDate);
+        return results.stream()
+                .map(row -> new RevenueMonthDto(
+                        row[0].toString(), // Ánh xạ issue_date sang String
+                        ((Number) row[1]).doubleValue() // Ánh xạ total_for_day sang Double
+                ))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<RevenueYearDto> calculateRevenueYearLatest() {
+        List<Object[]> results = billRepository.calculateRevenueLastYear();
+        return results.stream()
+                .map(row -> new RevenueYearDto(
+                        row[0].toString(), // Ánh xạ issue_date sang String
+                        ((Number) row[1]).doubleValue() // Ánh xạ total_for_day sang Double
+                ))
                 .collect(Collectors.toList());
     }
 }

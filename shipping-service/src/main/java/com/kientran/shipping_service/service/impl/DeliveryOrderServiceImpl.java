@@ -1,6 +1,7 @@
 package com.kientran.shipping_service.service.impl;
 
 import com.kientran.shipping_service.dto.DeliveryOrderDto;
+import com.kientran.shipping_service.dto.PaymentDto;
 import com.kientran.shipping_service.dto.ResDeliveryOrderDto;
 import com.kientran.shipping_service.entity.DeliveryOrder;
 import com.kientran.shipping_service.entity.Shipper;
@@ -64,6 +65,13 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
         Integer orderId = deliveryOrder.getOrderId();
         this.deliveryOrderRepository.delete(deliveryOrder);
         return orderId;
+    }
+
+    @Override
+    public List<ResDeliveryOrderDto> getAllDeliveryOrder() {
+        List<DeliveryOrder> deliveryOrders = this.deliveryOrderRepository.findAll();
+        return deliveryOrders.stream().map((deliveryOrder) -> this.modelMapper.map(deliveryOrder, ResDeliveryOrderDto.class))
+                .collect(Collectors.toList());
     }
 
     @Override

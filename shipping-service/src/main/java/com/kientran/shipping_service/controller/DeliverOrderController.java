@@ -55,15 +55,21 @@ public class DeliverOrderController {
                 HttpStatus.OK);
     }
 
-    @GetMapping("/current/")
+    @GetMapping("/current")
     public ResponseEntity<List<ResDeliveryOrderDto>> getAllDeliveryCurrentOrder() {
         List<ResDeliveryOrderDto> deliveryOrderDtos = this.deliveryOrderService.getAllDeliveryOrderCurrentDto();
         return new ResponseEntity<>(deliveryOrderDtos, HttpStatus.OK);
     }
 
-    @GetMapping("/complete/")
+    @GetMapping("/complete")
     public ResponseEntity<List<ResDeliveryOrderDto>> getAllDeliveryCompleteOrder() {
         List<ResDeliveryOrderDto> deliveryOrderDtos = this.deliveryOrderService.getAllDeliveryOrderCompleteDto();
+        return new ResponseEntity<>(deliveryOrderDtos, HttpStatus.OK);
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<ResDeliveryOrderDto>> getAllDeliveryOrder() {
+        List<ResDeliveryOrderDto> deliveryOrderDtos = this.deliveryOrderService.getAllDeliveryOrder();
         return new ResponseEntity<>(deliveryOrderDtos, HttpStatus.OK);
     }
 
