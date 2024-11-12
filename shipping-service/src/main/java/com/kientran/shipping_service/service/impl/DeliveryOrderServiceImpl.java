@@ -1,7 +1,6 @@
 package com.kientran.shipping_service.service.impl;
 
 import com.kientran.shipping_service.dto.DeliveryOrderDto;
-import com.kientran.shipping_service.dto.PaymentDto;
 import com.kientran.shipping_service.dto.ResDeliveryOrderDto;
 import com.kientran.shipping_service.entity.DeliveryOrder;
 import com.kientran.shipping_service.entity.Shipper;
@@ -78,7 +77,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
     public List<ResDeliveryOrderDto> getAllDeliveryOrderCurrentDto() {
         List<DeliveryOrder> deliveryOrders = this.deliveryOrderRepository.findAll();
         return deliveryOrders.stream()
-                .filter(deliveryOrder -> !deliveryOrder.getIsCompleted()) // Lọc đơn hàng có isCompleted = false
+                .filter(deliveryOrder -> deliveryOrder.getImageConfirmation() == null ) // Lọc đơn hàng khi chưa có ảnh xác nhận
                 .map(deliveryOrder -> this.modelMapper.map(deliveryOrder, ResDeliveryOrderDto.class)) // Ánh xạ đối tượng
                 .collect(Collectors.toList());
     }
@@ -87,7 +86,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
     public List<ResDeliveryOrderDto> getAllDeliveryOrderCompleteDto() {
         List<DeliveryOrder> deliveryOrders = this.deliveryOrderRepository.findAll();
         return deliveryOrders.stream()
-                .filter(DeliveryOrder::getIsCompleted) // Lọc đơn hàng có isCompleted = false
+                .filter(DeliveryOrder::getIsCompleted) // Lọc đơn hàng có isCompleted = true
                 .map(deliveryOrder -> this.modelMapper.map(deliveryOrder, ResDeliveryOrderDto.class)) // Ánh xạ đối tượng
                 .collect(Collectors.toList());
     }
@@ -114,7 +113,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
         String formattedDate = now.format(formatter);
         deliveryOrder.setCompleteDate(formattedDate);
-        deliveryOrder.setIsCompleted(true);
+//      deliveryOrder.setIsCompleted(true);
         DeliveryOrder updateDeliveryOrder = this.deliveryOrderRepository.save(deliveryOrder);
         return this.modelMapper.map(updateDeliveryOrder, ResDeliveryOrderDto.class);
     }
@@ -125,6 +124,14 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
         deliveryOrder.setImageConfirmation(null);
         deliveryOrder.setCompleteDate(null);
         deliveryOrder.setIsCompleted(false);
+        DeliveryOrder updateDeliveryOrder = this.deliveryOrderRepository.save(deliveryOrder);
+        return this.modelMapper.map(updateDeliveryOrder, ResDeliveryOrderDto.class);
+    }
+
+    @Override
+    public ResDeliveryOrderDto confirmDeliveryOrderShipper(Integer deliveryOrderId) {
+        DeliveryOrder deliveryOrder = this.deliveryOrderRepository.findById(deliveryOrderId).orElseThrow(() -> new ResourceNotFoundException("DeliveryOrder", "DeliveryId", deliveryOrderId));
+        deliveryOrder.setIsCompleted(true);
         DeliveryOrder updateDeliveryOrder = this.deliveryOrderRepository.save(deliveryOrder);
         return this.modelMapper.map(updateDeliveryOrder, ResDeliveryOrderDto.class);
     }

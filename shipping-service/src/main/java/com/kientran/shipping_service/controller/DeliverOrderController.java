@@ -78,7 +78,7 @@ public class DeliverOrderController {
                                                                     @PathVariable Integer deliveryOrderId) throws IOException {
         ResDeliveryOrderDto updateDeliveryOrder = this.deliveryOrderService.addImageConfirmation(deliveryOrderId, image);
         kafkaTemplate.send(UPDATE_COMPLETE_ORDER_TOPIC, String.valueOf(updateDeliveryOrder.getOrderId()));
-        this.shipperService.updateIncome(updateDeliveryOrder.getShipper().getId());
+//      this.shipperService.updateIncome(updateDeliveryOrder.getShipper().getId());
         ResDeliveryOrderDto newDeliveryOrder = this.deliveryOrderService.getDeliveryOrder(deliveryOrderId);
         return new ResponseEntity<>(newDeliveryOrder, HttpStatus.OK);
     }
@@ -86,6 +86,14 @@ public class DeliverOrderController {
     @PutMapping("/cancel/{deliveryOrderId}")
     public ResponseEntity<ResDeliveryOrderDto> cancelImageConfirmation(@PathVariable Integer deliveryOrderId) {
         ResDeliveryOrderDto updateDeliveryOrder = this.deliveryOrderService.cancelImageConfirmation(deliveryOrderId);
+        return new ResponseEntity<>(updateDeliveryOrder, HttpStatus.OK);
+    }
+
+    @PutMapping("/complete/confirm/{deliveryOrderId}/{shipperId}")
+    public ResponseEntity<ResDeliveryOrderDto> confirmShipperDeliverySuccess(@PathVariable Integer deliveryOrderId,
+                                                                    @PathVariable Integer shipperId){
+        ResDeliveryOrderDto updateDeliveryOrder = this.deliveryOrderService.confirmDeliveryOrderShipper(deliveryOrderId);
+        this.shipperService.updateIncome(shipperId);
         return new ResponseEntity<>(updateDeliveryOrder, HttpStatus.OK);
     }
 

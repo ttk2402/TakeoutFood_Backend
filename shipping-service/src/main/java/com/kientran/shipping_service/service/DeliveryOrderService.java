@@ -2,7 +2,6 @@ package com.kientran.shipping_service.service;
 
 import com.kientran.shipping_service.dto.DeliveryOrderDto;
 import com.kientran.shipping_service.dto.ResDeliveryOrderDto;
-import com.kientran.shipping_service.dto.ResShipperDto;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -17,4 +16,5 @@ public interface DeliveryOrderService {
     List<ResDeliveryOrderDto> getAllDeliveryOrderCompleteDto();
     ResDeliveryOrderDto addImageConfirmation(Integer deliveryOrderId, MultipartFile image) throws IOException;
     ResDeliveryOrderDto cancelImageConfirmation(Integer deliveryOrderId);
+    ResDeliveryOrderDto confirmDeliveryOrderShipper(Integer deliveryOrderId);
 }
