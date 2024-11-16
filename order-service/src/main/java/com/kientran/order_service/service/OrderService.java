@@ -4,6 +4,8 @@ import com.kientran.order_service.dto.OrderDto;
 import com.kientran.order_service.dto.ResOrderDto;
 import com.kientran.order_service.dto.RevenueDto;
 import com.kientran.order_service.dto.TotalOrderDto;
+import com.kientran.order_service.webclient.ResItemDto;
+
 import java.util.List;
 
 public interface OrderService {
@@ -17,4 +19,5 @@ public interface OrderService {
     List<ResOrderDto> getAllOrderOfAccountID(Integer accountId);
     RevenueDto getRevenueOfStore();
     TotalOrderDto getTotalOrderInStore();
+    List<ResItemDto> getItemByAccountID(Integer accountId);
 }

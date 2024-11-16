@@ -1,4 +1,4 @@
-package com.kientran.order_service.client;
+package com.kientran.order_service.webclient;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

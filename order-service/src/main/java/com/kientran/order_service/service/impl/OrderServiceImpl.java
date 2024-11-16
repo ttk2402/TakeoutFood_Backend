@@ -1,7 +1,5 @@
 package com.kientran.order_service.service.impl;
 
-import com.kientran.order_service.client.CartServiceClient;
-import com.kientran.order_service.client.ResItemDto;
 import com.kientran.order_service.dto.*;
 import com.kientran.order_service.entity.*;
 import com.kientran.order_service.exception.ResourceNotFoundException;
@@ -9,10 +7,15 @@ import com.kientran.order_service.repository.*;
 import com.kientran.order_service.service.BillService;
 import com.kientran.order_service.service.ItemOrderedService;
 import com.kientran.order_service.service.OrderService;
+import com.kientran.order_service.webclient.ResItemDto;
 import org.modelmapper.ModelMapper;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -28,7 +31,7 @@ public class OrderServiceImpl implements OrderService {
     private final ModelMapper modelMapper;
     private final ItemOrderedService itemOrderedService;
     private final BillService billService;
-    private final CartServiceClient cartServiceClient;
+    private final WebClient webClient;
     private final KafkaTemplate<String, String> kafkaTemplate;
     private static final String DELETE_ITEM_TOPIC = "delete_item_topic";
 
@@ -53,7 +56,7 @@ public class OrderServiceImpl implements OrderService {
         changeStatusOfOrder(orderId, 4);
     }
 
-    public OrderServiceImpl(DeliveryInformationRepository deliveryInfoRepository, CheckoutRepository checkOutRepository, OrderStatusRepository orderStatusRepository, OrderRepository orderRepository, BillRepository billRepository, ModelMapper modelMapper, ItemOrderedService itemOrderedService, BillService billService, CartServiceClient cartServiceClient, KafkaTemplate<String, String> kafkaTemplate) {
+    public OrderServiceImpl(DeliveryInformationRepository deliveryInfoRepository, CheckoutRepository checkOutRepository, OrderStatusRepository orderStatusRepository, OrderRepository orderRepository, BillRepository billRepository, ModelMapper modelMapper, ItemOrderedService itemOrderedService, BillService billService, WebClient webClient, KafkaTemplate<String, String> kafkaTemplate) {
         this.deliveryInfoRepository = deliveryInfoRepository;
         this.checkOutRepository = checkOutRepository;
         this.orderStatusRepository = orderStatusRepository;
@@ -62,7 +65,7 @@ public class OrderServiceImpl implements OrderService {
         this.modelMapper = modelMapper;
         this.itemOrderedService = itemOrderedService;
         this.billService = billService;
-        this.cartServiceClient = cartServiceClient;
+        this.webClient = webClient;
         this.kafkaTemplate = kafkaTemplate;
     }
 
@@ -78,7 +81,7 @@ public class OrderServiceImpl implements OrderService {
         order.setCheckout(checkout);
         order.setOrderStatus(orStatus);
         Order addOrder = this.orderRepository.save(order);
-        List<ResItemDto> items = this.cartServiceClient.getItemByAccountID(orderDto.getAccountId());
+        List<ResItemDto> items = getItemByAccountID(orderDto.getAccountId());
         Double total_price = 0.0;
         for (ResItemDto itemDto : items) {
             ItemOrderedDto ordered = modelMapper.map(itemDto, ItemOrderedDto.class);
@@ -113,7 +116,7 @@ public class OrderServiceImpl implements OrderService {
         order.setOrderStatus(orStatus);
         order.setDeliveryInformation(deliveryInfo);
         Order addOrder = this.orderRepository.save(order);
-        List<ResItemDto> items = this.cartServiceClient.getItemByAccountID(orderDto.getAccountId());
+        List<ResItemDto> items = getItemByAccountID(orderDto.getAccountId());
         Double total_price = 0.0;
         for (ResItemDto itemDto : items) {
             ItemOrderedDto ordered = modelMapper.map(itemDto, ItemOrderedDto.class);
@@ -190,5 +193,15 @@ public class OrderServiceImpl implements OrderService {
         TotalOrderDto orderDto = new TotalOrderDto();
         orderDto.setTotal(this.orderRepository.getTotalOrder());
         return orderDto;
+    }
+
+    public List<ResItemDto> getItemByAccountID(Integer accountId) {
+        String url_Endpoint = "http://localhost:8083/api/item/all/account/" + accountId;
+        Mono<List<ResItemDto>> responseMono = webClient.get()
+                .uri(url_Endpoint)
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<>() {
+                });  // Chờ kết quả và lấy giá trị trực tiếp từ Mono
+        return responseMono.block();  // block() sẽ chờ cho tới khi Mono hoàn tất và trả về dữ liệu
     }
 }

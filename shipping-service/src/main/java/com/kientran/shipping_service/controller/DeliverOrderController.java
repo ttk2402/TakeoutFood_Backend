@@ -2,6 +2,7 @@ package com.kientran.shipping_service.controller;
 
 import com.kientran.shipping_service.dto.DeliveryOrderDto;
 import com.kientran.shipping_service.dto.ResDeliveryOrderDto;
+import com.kientran.shipping_service.imgur.ImgurService;
 import com.kientran.shipping_service.response.ApiResponse;
 import com.kientran.shipping_service.service.DeliveryOrderService;
 import com.kientran.shipping_service.service.ShipperService;
@@ -11,7 +12,6 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -21,14 +21,16 @@ public class DeliverOrderController {
 
     private final DeliveryOrderService deliveryOrderService;
     private final ShipperService shipperService;
+    private final ImgurService imgurService;
     private final KafkaTemplate<String, String> kafkaTemplate;
     private static final String UPDATE_STATUS_ORDER_TOPIC = "update_status_order_topic";
     private static final String UPDATE_CANCEL_ORDER_TOPIC = "update_cancel_order_topic";
     private static final String UPDATE_COMPLETE_ORDER_TOPIC = "update_complete_order_topic";
 
-    public DeliverOrderController(DeliveryOrderService deliveryOrderService, ShipperService shipperService, KafkaTemplate<String, String> kafkaTemplate) {
+    public DeliverOrderController(DeliveryOrderService deliveryOrderService, ShipperService shipperService, ImgurService imgurService, KafkaTemplate<String, String> kafkaTemplate) {
         this.deliveryOrderService = deliveryOrderService;
         this.shipperService = shipperService;
+        this.imgurService = imgurService;
         this.kafkaTemplate = kafkaTemplate;
     }
 
@@ -75,8 +77,9 @@ public class DeliverOrderController {
 
     @PutMapping("/complete/{deliveryOrderId}")
     public ResponseEntity<ResDeliveryOrderDto> addImageConfirmation(@RequestParam MultipartFile image,
-                                                                    @PathVariable Integer deliveryOrderId) throws IOException {
-        ResDeliveryOrderDto updateDeliveryOrder = this.deliveryOrderService.addImageConfirmation(deliveryOrderId, image);
+                                                                    @PathVariable Integer deliveryOrderId) {
+        String imageUrl = this.imgurService.uploadImage(image);
+        ResDeliveryOrderDto updateDeliveryOrder = this.deliveryOrderService.addImageConfirmation(deliveryOrderId, imageUrl);
         kafkaTemplate.send(UPDATE_COMPLETE_ORDER_TOPIC, String.valueOf(updateDeliveryOrder.getOrderId()));
 //      this.shipperService.updateIncome(updateDeliveryOrder.getShipper().getId());
         ResDeliveryOrderDto newDeliveryOrder = this.deliveryOrderService.getDeliveryOrder(deliveryOrderId);
